@@ -6,7 +6,7 @@ namespace Pessoto.HubDataPusher.EventHub.Core
     {
         public string ConnectionString { get; init; } = string.Empty;
 
-        public int BatchSize { get; init; }
+        public long MaximumBatchSize { get; init; }
 
         public TimeSpan DelayBetweenBatches { get; init; }
 

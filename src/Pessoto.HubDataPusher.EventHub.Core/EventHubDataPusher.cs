@@ -14,16 +14,18 @@ namespace Pessoto.HubDataPusher.EventHub.Core
         private readonly EventHubConnection _connection;
         private readonly IHubDataGenerator _hubDataGenerator;
         private readonly ILogger<EventHubDataPusher> _logger;
-        private readonly int _batchSize;
+        private readonly long _maximumBatchSize;
         private readonly TimeSpan _delayBetweenBatches;
         private readonly int _numberOfThreads;
+
+        private static int senderNumber = 0;
 
         public EventHubDataPusher(IOptions<EventHubDataPusherOptions> options, IHubDataGenerator hubDataGenerator, ILogger<EventHubDataPusher> logger)
         {
             _connection = new EventHubConnection(options.Value.ConnectionString);
             _hubDataGenerator = hubDataGenerator;
             _logger = logger;
-            _batchSize = options.Value.BatchSize;
+            _maximumBatchSize = options.Value.MaximumBatchSize;
             _delayBetweenBatches = options.Value.DelayBetweenBatches;
             _numberOfThreads = options.Value.NumberOfThread;
         }
@@ -34,7 +36,7 @@ namespace Pessoto.HubDataPusher.EventHub.Core
 
             for (int i = 0; i < _numberOfThreads; i++)
             {
-                tasks[i] = Task.Factory.StartNew(async () => { await SendBatchLoop(cancellationToken); }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+                tasks[i] = Task.Factory.StartNew(async () => { await SendBatchLoop(Interlocked.Increment(ref senderNumber), cancellationToken); }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
             }
 
             try
@@ -44,12 +46,12 @@ namespace Pessoto.HubDataPusher.EventHub.Core
             catch (OperationCanceledException) { }
         }
 
-        private async Task SendBatchLoop(CancellationToken cancellationToken)
+        private async Task SendBatchLoop(int senderId, CancellationToken cancellationToken)
         {
             await using EventHubProducerClient producerClient = new(_connection);
             while (true)
             {
-                await SendBatch(producerClient, cancellationToken);
+                await SendBatch(senderId, producerClient, cancellationToken);
                 if (_delayBetweenBatches != TimeSpan.Zero)
                 {
                     await Task.Delay(_delayBetweenBatches, cancellationToken);
@@ -57,18 +59,18 @@ namespace Pessoto.HubDataPusher.EventHub.Core
             }
         }
 
-        private async Task SendBatch(EventHubProducerClient producerClient, CancellationToken cancellationToken)
+        private async Task SendBatch(int senderId, EventHubProducerClient producerClient, CancellationToken cancellationToken)
         {
-            using (EventDataBatch eventBatch = await producerClient.CreateBatchAsync(cancellationToken))
+            using (EventDataBatch eventBatch = await producerClient.CreateBatchAsync(new CreateBatchOptions() { MaximumSizeInBytes = _maximumBatchSize }, cancellationToken))
             {
-                for (int i = 0; i < _batchSize; i++)
-                {
-                    eventBatch.TryAdd(new EventData(_hubDataGenerator.GeneratePayload()));
-                }
-                await producerClient.SendAsync(eventBatch, cancellationToken);
-            }
+                while (eventBatch.TryAdd(new EventData(_hubDataGenerator.GeneratePayload()))) ;
 
-            _logger.LogInformation($"Thread: {Thread.CurrentThread.ManagedThreadId}. {DateTime.Now} - A batch of {_batchSize} events has been published.");
+                await producerClient.SendAsync(eventBatch, cancellationToken);
+                DataPusherEventSource.Log.EventsSent(eventBatch.Count);
+                DataPusherEventSource.Log.BytesSent(eventBatch.SizeInBytes);
+
+                _logger.LogInformation($"Sender Id: {senderId}. {DateTime.Now} - A batch of {eventBatch.Count} events ({eventBatch.SizeInBytes} bytes) has been published.");
+            }
         }
     }
 }
