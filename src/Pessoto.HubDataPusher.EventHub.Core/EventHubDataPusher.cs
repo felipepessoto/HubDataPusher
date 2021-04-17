@@ -46,15 +46,13 @@ namespace Pessoto.HubDataPusher.EventHub.Core
 
         private async Task SendBatchLoop(CancellationToken cancellationToken)
         {
-            await using (EventHubProducerClient producerClient = new EventHubProducerClient(_connection))
+            await using EventHubProducerClient producerClient = new(_connection);
+            while (true)
             {
-                while (true)
+                await SendBatch(producerClient, cancellationToken);
+                if (_delayBetweenBatches != TimeSpan.Zero)
                 {
-                    await SendBatch(producerClient, cancellationToken);
-                    if (_delayBetweenBatches != TimeSpan.Zero)
-                    {
-                        await Task.Delay(_delayBetweenBatches, cancellationToken);
-                    }
+                    await Task.Delay(_delayBetweenBatches, cancellationToken);
                 }
             }
         }

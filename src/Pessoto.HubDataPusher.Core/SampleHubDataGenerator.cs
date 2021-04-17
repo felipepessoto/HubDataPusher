@@ -8,6 +8,8 @@ namespace Pessoto.HubDataPusher.Core
         const double minHumidity = 60;
         const string stringData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam laoreet aliquam elit, sit amet mattis velit imperdiet eget. Quisque erat nibh, efficitur condimentum eros ut, pharetra posuere felis. Etiam leo dui, venenatis vitae finibus et, accumsan quis velit. Curabitur non dapibus sapien. Sed commodo velit eget ex luctus malesuada. Phasellus dignissim orci quis turpis eleifend, at molestie nibh laoreet. Phasellus tincidunt iaculis ligula, in vestibulum ante vestibulum ut. Duis ultrices sollicitudin erat, eget tempor eros. Sed nisi augue, accumsan et scelerisque a, faucibus nec ex. Vestibulum tempor rutrum massa in condimentum. In sit amet finibus arcu. Phasellus in commodo sem. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eu semper diam.";
 
+        private readonly Random r = new();
+
         public BinaryData GeneratePayload()
         {
             double currentTemperature = minTemperature + NextDoubleRandom() * 15;
@@ -33,8 +35,6 @@ namespace Pessoto.HubDataPusher.Core
 
             return BinaryData.FromObjectAsJson(telemetryDataPoint);
         }
-
-        private Random r = new Random();
 
         private int NextRandom(int minInclusive, int maxExclusive)
         {
