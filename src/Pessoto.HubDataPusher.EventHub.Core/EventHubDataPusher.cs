@@ -48,6 +48,11 @@ namespace Pessoto.HubDataPusher.EventHub.Core
 
         private async Task SendBatchLoop(int senderId, CancellationToken cancellationToken)
         {
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation($"Starting sender Id: {senderId}");
+            }
+
             try
             {
                 await using EventHubProducerClient producerClient = new(_connection);
@@ -60,7 +65,8 @@ namespace Pessoto.HubDataPusher.EventHub.Core
                     }
                 }
             }
-            catch(Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, ex.ToString());
                 throw;
@@ -77,7 +83,10 @@ namespace Pessoto.HubDataPusher.EventHub.Core
                 DataPusherEventSource.Log.EventsSent(eventBatch.Count);
                 DataPusherEventSource.Log.BytesSent(eventBatch.SizeInBytes);
 
-                _logger.LogInformation($"Sender Id: {senderId}. {DateTime.Now} - A batch of {eventBatch.Count} events ({eventBatch.SizeInBytes} bytes) has been published.");
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug($"Sender Id: {senderId}. A batch of {eventBatch.Count} events ({eventBatch.SizeInBytes} bytes) has been published.");
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pessoto.HubDataPusher.Core;
 using Pessoto.HubDataPusher.EventHub.Core;
+using System;
 
 namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
 {
@@ -17,8 +18,21 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.Configure<EventHubDataPusherOptions>(hostContext.Configuration.GetSection("EventHubDataPusher"));
-                    services.AddTransient<IHubDataGenerator, SampleHubDataGenerator>();
-                    //services.AddTransient<IHubDataGenerator, StaticDataHubDataGenerator>();
+
+                    string dataGeneratorType = hostContext.Configuration["HubDataGenerator:Type"];
+                    if (dataGeneratorType == "SampleHubDataGenerator")
+                    {
+                        services.AddTransient<IHubDataGenerator, SampleHubDataGenerator>();
+                    }
+                    else if (dataGeneratorType == "StaticDataHubDataGenerator")
+                    {
+                        services.AddTransient<IHubDataGenerator, StaticDataHubDataGenerator>();
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Invalid HubDataGenerator.Type: {dataGeneratorType}");
+                    }
+
                     services.AddTransient<EventHubDataPusher, EventHubDataPusher>();
                     services.AddHostedService<Worker>();
                 });
