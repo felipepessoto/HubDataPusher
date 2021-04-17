@@ -18,6 +18,7 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
                 {
                     services.Configure<EventHubDataPusherOptions>(hostContext.Configuration.GetSection("EventHubDataPusher"));
                     services.AddTransient<IHubDataGenerator, SampleHubDataGenerator>();
+                    //services.AddTransient<IHubDataGenerator, StaticDataHubDataGenerator>();
                     services.AddTransient<EventHubDataPusher, EventHubDataPusher>();
                     services.AddHostedService<Worker>();
                 });
