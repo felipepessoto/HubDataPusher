@@ -12,7 +12,7 @@ namespace Pessoto.HubDataPusher.EventHub.Core
     public class EventHubDataPusher
     {
         private readonly EventHubConnection _connection;
-        private readonly long _maximumBatchSize;
+        private readonly long? _maximumBatchSize;
         private readonly int _numberOfThreads;
 
         private readonly IHubDataGenerator _hubDataGenerator;
