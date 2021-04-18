@@ -18,6 +18,7 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.Configure<EventHubDataPusherOptions>(hostContext.Configuration.GetSection("EventHubDataPusher"));
+                    services.Configure<BandwitdhThrottlerOptions>(hostContext.Configuration.GetSection("BandwitdhThrottler"));
 
                     string dataGeneratorType = hostContext.Configuration["HubDataGenerator:Type"];
                     if (dataGeneratorType == "SampleHubDataGenerator")
@@ -33,6 +34,7 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
                         throw new InvalidOperationException($"Invalid HubDataGenerator.Type: {dataGeneratorType}");
                     }
 
+                    services.AddTransient<BandwitdhThrottler, BandwitdhThrottler>();
                     services.AddTransient<EventHubDataPusher, EventHubDataPusher>();
                     services.AddHostedService<Worker>();
                 });

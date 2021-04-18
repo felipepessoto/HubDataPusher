@@ -12,22 +12,24 @@ namespace Pessoto.HubDataPusher.EventHub.Core
     public class EventHubDataPusher
     {
         private readonly EventHubConnection _connection;
-        private readonly IHubDataGenerator _hubDataGenerator;
-        private readonly ILogger<EventHubDataPusher> _logger;
         private readonly long _maximumBatchSize;
-        private readonly TimeSpan _delayBetweenBatches;
         private readonly int _numberOfThreads;
+
+        private readonly IHubDataGenerator _hubDataGenerator;
+        private readonly BandwitdhThrottler _bandwitdhThrottler;
+        private readonly ILogger<EventHubDataPusher> _logger;
 
         private static int senderNumber = 0;
 
-        public EventHubDataPusher(IOptions<EventHubDataPusherOptions> options, IHubDataGenerator hubDataGenerator, ILogger<EventHubDataPusher> logger)
+        public EventHubDataPusher(IOptions<EventHubDataPusherOptions> options, IHubDataGenerator hubDataGenerator, BandwitdhThrottler bandwitdhThrottler, ILogger<EventHubDataPusher> logger)
         {
             _connection = new EventHubConnection(options.Value.ConnectionString);
-            _hubDataGenerator = hubDataGenerator;
-            _logger = logger;
             _maximumBatchSize = options.Value.MaximumBatchSize;
-            _delayBetweenBatches = options.Value.DelayBetweenBatches;
             _numberOfThreads = options.Value.NumberOfThread;
+
+            _hubDataGenerator = hubDataGenerator;
+            _bandwitdhThrottler = bandwitdhThrottler;
+            _logger = logger;
         }
 
         public async Task Start(CancellationToken cancellationToken)
@@ -56,13 +58,9 @@ namespace Pessoto.HubDataPusher.EventHub.Core
             try
             {
                 await using EventHubProducerClient producerClient = new(_connection);
-                while (true)
+                while (cancellationToken.IsCancellationRequested == false)
                 {
                     await SendBatch(senderId, producerClient, cancellationToken);
-                    if (_delayBetweenBatches != TimeSpan.Zero)
-                    {
-                        await Task.Delay(_delayBetweenBatches, cancellationToken);
-                    }
                 }
             }
             catch (OperationCanceledException) { throw; }
@@ -79,7 +77,10 @@ namespace Pessoto.HubDataPusher.EventHub.Core
             {
                 while (eventBatch.TryAdd(new EventData(_hubDataGenerator.GeneratePayload()))) ;
 
+                _bandwitdhThrottler.Consume(eventBatch.SizeInBytes);
+
                 await producerClient.SendAsync(eventBatch, cancellationToken);
+
                 DataPusherEventSource.Log.EventsSent(eventBatch.Count);
                 DataPusherEventSource.Log.BytesSent(eventBatch.SizeInBytes);
 

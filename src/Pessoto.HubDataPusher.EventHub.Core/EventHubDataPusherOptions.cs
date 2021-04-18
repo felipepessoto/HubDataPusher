@@ -8,8 +8,6 @@ namespace Pessoto.HubDataPusher.EventHub.Core
 
         public long MaximumBatchSize { get; init; }
 
-        public TimeSpan DelayBetweenBatches { get; init; }
-
         public int NumberOfThread { get; init; }
     }
 }
