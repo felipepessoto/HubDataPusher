@@ -29,6 +29,10 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
                     {
                         services.AddTransient<IHubDataGenerator, StaticDataHubDataGenerator>();
                     }
+                    else if (dataGeneratorType == "SmallEventsHubDataGenerator")
+                    {
+                        services.AddTransient<IHubDataGenerator, SmallEventsHubDataGenerator>();
+                    }
                     else
                     {
                         throw new InvalidOperationException($"Invalid HubDataGenerator.Type: {dataGeneratorType}");
