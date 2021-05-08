@@ -79,7 +79,19 @@ namespace Pessoto.HubDataPusher.EventHub.Core
 
                 _bandwitdhThrottler.Consume(eventBatch.SizeInBytes);
 
-                await producerClient.SendAsync(eventBatch, cancellationToken);
+                try
+                {
+                    await producerClient.SendAsync(eventBatch, cancellationToken);
+                }
+                catch(EventHubsException ex) when (ex.IsTransient)
+                {
+                    _logger.LogWarning(ex.ToString());
+
+                    if(ex.Reason == EventHubsException.FailureReason.ServiceBusy)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(5));
+                    }
+                }
 
                 DataPusherEventSource.Log.EventsSent(eventBatch.Count);
                 DataPusherEventSource.Log.BytesSent(eventBatch.SizeInBytes);
