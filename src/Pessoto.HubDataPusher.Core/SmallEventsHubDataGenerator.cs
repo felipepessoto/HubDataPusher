@@ -17,7 +17,7 @@ namespace Pessoto.HubDataPusher.Core
             object telemetryDataPoint = new
             {
                 createdAt = DateTime.UtcNow,
-                deviceId = "EventHubDevice",
+                deviceId = "EventHubDevice" + NextRandom(1, 300000),
                 temperature = currentTemperature,
                 humidity = currentHumidity,
             };
