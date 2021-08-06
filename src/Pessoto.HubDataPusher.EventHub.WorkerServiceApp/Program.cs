@@ -37,11 +37,7 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
 
         private static void AddHubDataGenerator(IServiceCollection services, string dataGeneratorType)
         {
-            if (dataGeneratorType == "SampleHubDataGenerator")
-            {
-                services.AddTransient<IHubDataGenerator, SampleHubDataGenerator>();
-            }
-            else if (dataGeneratorType == "StaticDataHubDataGenerator")
+            if (dataGeneratorType == "StaticDataHubDataGenerator")
             {
                 services.AddTransient<IHubDataGenerator, StaticDataHubDataGenerator>();
             }
