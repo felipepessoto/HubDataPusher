@@ -13,20 +13,12 @@ namespace Pessoto.HubDataPusher.Core
         private readonly Dictionary<string, object> data;
 
         public string IdPropertyName { get; }
-        //public string IdPropertyValuePrefix { get; }
-        public int NumberOfIds { get; }
-        //public string ValuePropertyName { get; }
-        //public int NumberOfProperties { get; }
 
         public DynamicSchemaHubDataGenerator(IOptions<DynamicSchemaHubDataGeneratorOptions> options)
         {
             IdPropertyName = options.Value.IdPropertyName;
-            //IdPropertyValuePrefix = options.Value.IdPropertyValuePrefix;
-            NumberOfIds = options.Value.NumberOfIds;
-            //ValuePropertyName = options.Value.ValuePropertyName;
-            //NumberOfProperties = options.Value.NumberOfProperties;
 
-            IdValues = new string[NumberOfIds];
+            IdValues = new string[options.Value.NumberOfIds];
             for (int i = 0; i < IdValues.Length; i++)
             {
                 IdValues[i] = $"{options.Value.IdPropertyValuePrefix}_{i + 1:0000000000}";//Pre-allocates all the string and avoid allocating it every time a payload is generated
@@ -43,7 +35,7 @@ namespace Pessoto.HubDataPusher.Core
 
         public BinaryData GeneratePayload()
         {
-            data[IdPropertyName] = IdValues[NextRandom(0, NumberOfIds)];
+            data[IdPropertyName] = IdValues[NextRandom(0, IdValues.Length)];
 
             for (int i = 0; i < PropertyValueNames.Length; i++)
             {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.Text;
 
 namespace Pessoto.HubDataPusher.Core
@@ -8,18 +9,39 @@ namespace Pessoto.HubDataPusher.Core
     /// </summary>
     public class BigEventsHubDataGenerator : IHubDataGenerator
     {
-        private const double minTemperature = 20;
-        private const double minHumidity = 60;
+        private const int maxMessageSize = 250 * 1024;
 
-        private static string messageBody;
-
+        private readonly string[] IdValues;
+        private readonly string messageBody;
         private readonly Random r = new();
 
-        static BigEventsHubDataGenerator()
+        public BigEventsHubDataGenerator(IOptions<BigEventsHubDataGeneratorOptions> options)
+        {
+            IdValues = new string[options.Value.NumberOfIds];
+
+            for (int i = 0; i < IdValues.Length; i++)
+            {
+                IdValues[i] = $"{options.Value.IdPropertyValuePrefix}_{i + 1:0000000000}";//Pre-allocates all the string and avoid allocating it every time a payload is generated
+            }
+
+            messageBody = GenerateBigString();
+        }
+
+        public BinaryData GeneratePayload()
+        {
+            object telemetryDataPoint = new
+            {
+                deviceId = IdValues[NextRandom(0, IdValues.Length)],
+                message = messageBody,
+            };
+
+            return BinaryData.FromObjectAsJson(telemetryDataPoint);
+        }
+
+        private static string GenerateBigString()
         {
             string sampleMessage = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam sagittis ante erat, ut finibus purus iaculis vel. Sed suscipit tempor ipsum, id ornare arcu. Duis eros velit, dapibus cursus dolor sed, tincidunt egestas ipsum. Mauris non erat diam. Donec aliquet ultrices tincidunt. Vestibulum gravida leo nunc, ac auctor lacus varius sit amet. Quisque ultricies aliquet mauris, et dignissim orci consectetur at.";
 
-            const int maxMessageSize = 250 * 1024;
             StringBuilder sb = new StringBuilder(maxMessageSize);
             int messageBodyLengthLimit = maxMessageSize - sampleMessage.Length;
 
@@ -28,24 +50,7 @@ namespace Pessoto.HubDataPusher.Core
                 sb.Append(sampleMessage);
             }
 
-            messageBody = sb.ToString();
-        }
-
-        public BinaryData GeneratePayload()
-        {
-            double currentTemperature = minTemperature + NextDoubleRandom() * 15;
-            double currentHumidity = minHumidity + NextDoubleRandom() * 20;
-
-            object telemetryDataPoint = new
-            {
-                createdAt = DateTime.UtcNow,
-                deviceId = "EventHubDevice" + NextRandom(1, 300000),
-                temperature = currentTemperature,
-                humidity = currentHumidity,
-                message = messageBody,
-            };
-
-            return BinaryData.FromObjectAsJson(telemetryDataPoint);
+            return sb.ToString();
         }
 
         private int NextRandom(int minInclusive, int maxExclusive)
@@ -53,14 +58,6 @@ namespace Pessoto.HubDataPusher.Core
             lock (r)
             {
                 return r.Next(minInclusive, maxExclusive);
-            }
-        }
-
-        private double NextDoubleRandom()
-        {
-            lock (r)
-            {
-                return r.NextDouble();
             }
         }
     }
