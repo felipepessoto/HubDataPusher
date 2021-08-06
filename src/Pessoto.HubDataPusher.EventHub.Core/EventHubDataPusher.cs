@@ -85,10 +85,12 @@ namespace Pessoto.HubDataPusher.EventHub.Core
                 }
                 catch(EventHubsException ex) when (ex.IsTransient)
                 {
+                    _logger.LogWarning("Transient Error:");
                     _logger.LogWarning(ex.ToString());
 
                     if(ex.Reason == EventHubsException.FailureReason.ServiceBusy)
                     {
+                        _logger.LogWarning("ServiceBusy. Waiting 5 seconds");
                         await Task.Delay(TimeSpan.FromSeconds(5));
                     }
                 }

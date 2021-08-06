@@ -17,38 +17,48 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.Configure<EventHubDataPusherOptions>(hostContext.Configuration.GetSection("EventHubDataPusher"));
-                    services.Configure<BandwitdhThrottlerOptions>(hostContext.Configuration.GetSection("BandwitdhThrottler"));
+                    ConfigureOptions(hostContext, services);
 
-                    string dataGeneratorType = hostContext.Configuration["HubDataGenerator:Type"];
-                    if (dataGeneratorType == "SampleHubDataGenerator")
-                    {
-                        services.AddTransient<IHubDataGenerator, SampleHubDataGenerator>();
-                    }
-                    else if (dataGeneratorType == "StaticDataHubDataGenerator")
-                    {
-                        services.AddTransient<IHubDataGenerator, StaticDataHubDataGenerator>();
-                    }
-                    else if (dataGeneratorType == "SmallEventsHubDataGenerator")
-                    {
-                        services.AddTransient<IHubDataGenerator, SmallEventsHubDataGenerator>();
-                    }
-                    else if (dataGeneratorType == "BigEventsHubDataGenerator")
-                    {
-                        services.AddTransient<IHubDataGenerator, BigEventsHubDataGenerator>();
-                    }
-                    else if (dataGeneratorType == "DynamicSchemaHubDataGenerator")
-                    {
-                        services.AddTransient<IHubDataGenerator, DynamicSchemaHubDataGenerator>();
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Invalid HubDataGenerator.Type: {dataGeneratorType}");
-                    }
+                    AddHubDataGenerator(services, hostContext.Configuration["HubDataGenerator:Type"]);
 
                     services.AddTransient<BandwitdhThrottler, BandwitdhThrottler>();
                     services.AddTransient<EventHubDataPusher, EventHubDataPusher>();
                     services.AddHostedService<Worker>();
                 });
+
+        private static void ConfigureOptions(HostBuilderContext hostContext, IServiceCollection services)
+        {
+            services.Configure<EventHubDataPusherOptions>(hostContext.Configuration.GetSection("EventHubDataPusher"));
+            services.Configure<BandwitdhThrottlerOptions>(hostContext.Configuration.GetSection("BandwitdhThrottler"));
+            services.Configure<DynamicSchemaHubDataGeneratorOptions>(hostContext.Configuration.GetSection("HubDataGenerator:DynamicSchemaHubDataGenerator"));
+        }
+
+        private static void AddHubDataGenerator(IServiceCollection services, string dataGeneratorType)
+        {
+            if (dataGeneratorType == "SampleHubDataGenerator")
+            {
+                services.AddTransient<IHubDataGenerator, SampleHubDataGenerator>();
+            }
+            else if (dataGeneratorType == "StaticDataHubDataGenerator")
+            {
+                services.AddTransient<IHubDataGenerator, StaticDataHubDataGenerator>();
+            }
+            else if (dataGeneratorType == "SmallEventsHubDataGenerator")
+            {
+                services.AddTransient<IHubDataGenerator, SmallEventsHubDataGenerator>();
+            }
+            else if (dataGeneratorType == "BigEventsHubDataGenerator")
+            {
+                services.AddTransient<IHubDataGenerator, BigEventsHubDataGenerator>();
+            }
+            else if (dataGeneratorType == "DynamicSchemaHubDataGenerator")
+            {
+                services.AddTransient<IHubDataGenerator, DynamicSchemaHubDataGenerator>();
+            }
+            else
+            {
+                throw new InvalidOperationException($"Invalid HubDataGenerator.Type: {dataGeneratorType}");
+            }
+        }
     }
 }
