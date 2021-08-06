@@ -32,6 +32,7 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
             services.Configure<BandwitdhThrottlerOptions>(hostContext.Configuration.GetSection("BandwitdhThrottler"));
             services.Configure<DynamicSchemaHubDataGeneratorOptions>(hostContext.Configuration.GetSection("HubDataGenerator:DynamicSchemaHubDataGenerator"));
             services.Configure<BigEventsHubDataGeneratorOptions>(hostContext.Configuration.GetSection("HubDataGenerator:BigEventsHubDataGenerator"));
+            services.Configure<StaticDataHubDataGeneratorOptions>(hostContext.Configuration.GetSection("HubDataGenerator:StaticDataHubDataGenerator"));
         }
 
         private static void AddHubDataGenerator(IServiceCollection services, string dataGeneratorType)
