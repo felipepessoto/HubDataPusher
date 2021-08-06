@@ -11,10 +11,10 @@ namespace Pessoto.HubDataPusher.Core
         private readonly bool _enabled;
         private readonly float _maxPushRateBytesPerMs;
         private readonly ILogger<BandwitdhThrottler> _logger;
-        private readonly Stopwatch _watch = new Stopwatch();
+        private readonly Stopwatch _watch = new();
+        private readonly object sync = new();
 
         private long _transmittedBytes = 0;
-        private object sync = new object();
 
         public BandwitdhThrottler(IOptions<BandwitdhThrottlerOptions> options, ILogger<BandwitdhThrottler> logger)
         {

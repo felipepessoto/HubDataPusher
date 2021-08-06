@@ -91,7 +91,7 @@ namespace Pessoto.HubDataPusher.EventHub.Core
                     if(ex.Reason == EventHubsException.FailureReason.ServiceBusy)
                     {
                         _logger.LogWarning("ServiceBusy. Waiting 5 seconds");
-                        await Task.Delay(TimeSpan.FromSeconds(5));
+                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                     }
                 }
 
