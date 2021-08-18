@@ -10,7 +10,6 @@ namespace Pessoto.HubDataPusher.Core
         private readonly Random r = new();
         private readonly string[] IdValues;
         private readonly string[] PropertyValueNames;
-        private readonly Dictionary<string, object> data;
 
         public string IdPropertyName { get; }
 
@@ -29,12 +28,11 @@ namespace Pessoto.HubDataPusher.Core
             {
                 PropertyValueNames[i] = $"{options.Value.ValuePropertyName}_{i + 1:0000000000}";//Pre-allocates all the string and avoid allocating it every time a payload is generated
             }
-
-            data = new Dictionary<string, object>(PropertyValueNames.Length + 1);
         }
 
         public BinaryData GeneratePayload()
         {
+            Dictionary<string, object> data = new Dictionary<string, object>(PropertyValueNames.Length + 1);
             data[IdPropertyName] = IdValues[NextRandom(0, IdValues.Length)];
 
             for (int i = 0; i < PropertyValueNames.Length; i++)
