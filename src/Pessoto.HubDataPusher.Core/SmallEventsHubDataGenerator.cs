@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Pessoto.HubDataPusher.Core
+﻿namespace Pessoto.HubDataPusher.Core
 {
     public class SmallEventsHubDataGenerator : IHubDataGenerator
     {

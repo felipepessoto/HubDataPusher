@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Pessoto.HubDataPusher.EventHub.Core
+﻿namespace Pessoto.HubDataPusher.EventHub.Core
 {
     public class EventHubDataPusherOptions
     {

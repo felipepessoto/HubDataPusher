@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
-using System.Threading;
 
 namespace Pessoto.HubDataPusher.Core
 {
@@ -26,7 +25,7 @@ namespace Pessoto.HubDataPusher.Core
 
         public void Consume(long bytes)
         {
-            if(_enabled == false)
+            if (_enabled == false)
             {
                 return;
             }

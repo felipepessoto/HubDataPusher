@@ -1,9 +1,4 @@
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Pessoto.HubDataPusher.EventHub.Core;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
 {
