@@ -9,7 +9,7 @@ Required:
 
 Optional:
 
-- **HubDataGenerator.Type** - It currently provides two types: SmallEventsHubDataGenerator, StaticDataHubDataGenerator, BigEventsHubDataGenerator and DynamicSchemaHubDataGenerator
+- **HubDataGenerator.Type** - It currently provides the following data generators: SmallEventsHubDataGenerator, StaticDataHubDataGenerator, BigEventsHubDataGenerator and DynamicSchemaHubDataGenerator
 - **EventHubDataPusher.MaximumBatchSize** - Maximum batch size. Can't be bigger than specified in https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-quotas
 - **EventHubDataPusher.NumberOfThread** - The number of threads pushing data
 - **BandwitdhThrottler.Enabled** - Enable bandwitdh throttler
