@@ -29,7 +29,7 @@ namespace Pessoto.HubDataPusher.Core
         {
             object telemetryDataPoint = new
             {
-                deviceId = IdValues[NextRandom(0, IdValues.Length)],
+                deviceId = IdValues[Random.Shared.Next(0, IdValues.Length)],
                 message = messageBody,
             };
 
@@ -49,11 +49,6 @@ namespace Pessoto.HubDataPusher.Core
             }
 
             return sb.ToString();
-        }
-
-        private int NextRandom(int minInclusive, int maxExclusive)
-        {
-            return Random.Shared.Next(minInclusive, maxExclusive);
         }
     }
 }

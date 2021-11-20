@@ -30,24 +30,14 @@ namespace Pessoto.HubDataPusher.Core
         public BinaryData GeneratePayload()
         {
             Dictionary<string, object> data = new Dictionary<string, object>(PropertyValueNames.Length + 1);
-            data[IdPropertyName] = IdValues[NextRandom(0, IdValues.Length)];
+            data[IdPropertyName] = IdValues[Random.Shared.Next(0, IdValues.Length)];
 
             for (int i = 0; i < PropertyValueNames.Length; i++)
             {
-                data[PropertyValueNames[i]] = minTemperature + NextDoubleRandom() * 15;
+                data[PropertyValueNames[i]] = minTemperature + Random.Shared.NextDouble() * 15;
             }
 
             return BinaryData.FromObjectAsJson(data);
-        }
-
-        private int NextRandom(int minInclusive, int maxExclusive)
-        {
-            return Random.Shared.Next(minInclusive, maxExclusive);
-        }
-
-        private double NextDoubleRandom()
-        {
-            return Random.Shared.NextDouble();
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Pessoto.HubDataPusher.EventHub.WorkerServiceApp
                     _logger.LogInformation("EventHubDataPusher stopped");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, ex.ToString());
                 _applicationLifetime.StopApplication();
