@@ -12,7 +12,6 @@ namespace Pessoto.HubDataPusher.Core
 
         private readonly string[] IdValues;
         private readonly string messageBody;
-        private readonly Random r = new();
 
         public BigEventsHubDataGenerator(IOptions<BigEventsHubDataGeneratorOptions> options)
         {
@@ -54,10 +53,7 @@ namespace Pessoto.HubDataPusher.Core
 
         private int NextRandom(int minInclusive, int maxExclusive)
         {
-            lock (r)
-            {
-                return r.Next(minInclusive, maxExclusive);
-            }
+            return Random.Shared.Next(minInclusive, maxExclusive);
         }
     }
 }

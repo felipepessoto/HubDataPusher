@@ -5,7 +5,6 @@ namespace Pessoto.HubDataPusher.Core
     public class DynamicSchemaHubDataGenerator : IHubDataGenerator
     {
         private const double minTemperature = 20;
-        private readonly Random r = new();
         private readonly string[] IdValues;
         private readonly string[] PropertyValueNames;
 
@@ -43,18 +42,12 @@ namespace Pessoto.HubDataPusher.Core
 
         private int NextRandom(int minInclusive, int maxExclusive)
         {
-            lock (r)
-            {
-                return r.Next(minInclusive, maxExclusive);
-            }
+            return Random.Shared.Next(minInclusive, maxExclusive);
         }
 
         private double NextDoubleRandom()
         {
-            lock (r)
-            {
-                return r.NextDouble();
-            }
+            return Random.Shared.NextDouble();
         }
     }
 }
