@@ -70,35 +70,34 @@ namespace Pessoto.HubDataPusher.EventHub.Core
 
         private async Task SendBatch(int senderId, EventHubProducerClient producerClient, CancellationToken cancellationToken)
         {
-            using (EventDataBatch eventBatch = await producerClient.CreateBatchAsync(new CreateBatchOptions() { MaximumSizeInBytes = _maximumBatchSize }, cancellationToken))
+            using EventDataBatch eventBatch = await producerClient.CreateBatchAsync(new CreateBatchOptions() { MaximumSizeInBytes = _maximumBatchSize }, cancellationToken);
+
+            while (eventBatch.TryAdd(new EventData(_hubDataGenerator.GeneratePayload()))) ;
+
+            _bandwitdhThrottler.Consume(eventBatch.SizeInBytes);
+
+            try
             {
-                while (eventBatch.TryAdd(new EventData(_hubDataGenerator.GeneratePayload()))) ;
+                await producerClient.SendAsync(eventBatch, cancellationToken);
+            }
+            catch (EventHubsException ex) when (ex.IsTransient)
+            {
+                _logger.LogWarning("Transient Error:");
+                _logger.LogWarning(ex.ToString());
 
-                _bandwitdhThrottler.Consume(eventBatch.SizeInBytes);
-
-                try
+                if (ex.Reason == EventHubsException.FailureReason.ServiceBusy)
                 {
-                    await producerClient.SendAsync(eventBatch, cancellationToken);
+                    _logger.LogWarning("ServiceBusy. Waiting 5 seconds");
+                    await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                 }
-                catch (EventHubsException ex) when (ex.IsTransient)
-                {
-                    _logger.LogWarning("Transient Error:");
-                    _logger.LogWarning(ex.ToString());
+            }
 
-                    if (ex.Reason == EventHubsException.FailureReason.ServiceBusy)
-                    {
-                        _logger.LogWarning("ServiceBusy. Waiting 5 seconds");
-                        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
-                    }
-                }
+            DataPusherEventSource.Log.EventsSent(eventBatch.Count);
+            DataPusherEventSource.Log.BytesSent(eventBatch.SizeInBytes);
 
-                DataPusherEventSource.Log.EventsSent(eventBatch.Count);
-                DataPusherEventSource.Log.BytesSent(eventBatch.SizeInBytes);
-
-                if (_logger.IsEnabled(LogLevel.Debug))
-                {
-                    _logger.LogDebug($"Sender Id: {senderId}. A batch of {eventBatch.Count} events ({eventBatch.SizeInBytes} bytes) has been published.");
-                }
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug($"Sender Id: {senderId}. A batch of {eventBatch.Count} events ({eventBatch.SizeInBytes} bytes) has been published.");
             }
         }
     }

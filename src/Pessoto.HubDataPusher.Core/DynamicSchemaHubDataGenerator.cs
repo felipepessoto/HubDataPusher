@@ -29,8 +29,10 @@ namespace Pessoto.HubDataPusher.Core
 
         public BinaryData GeneratePayload()
         {
-            Dictionary<string, object> data = new Dictionary<string, object>(PropertyValueNames.Length + 1);
-            data[IdPropertyName] = IdValues[Random.Shared.Next(0, IdValues.Length)];
+            Dictionary<string, object> data = new(PropertyValueNames.Length + 1)
+            {
+                [IdPropertyName] = IdValues[Random.Shared.Next(0, IdValues.Length)]
+            };
 
             for (int i = 0; i < PropertyValueNames.Length; i++)
             {

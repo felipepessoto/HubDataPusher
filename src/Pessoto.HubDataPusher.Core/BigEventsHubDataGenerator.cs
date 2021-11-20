@@ -40,7 +40,7 @@ namespace Pessoto.HubDataPusher.Core
         {
             string sampleMessage = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam sagittis ante erat, ut finibus purus iaculis vel. Sed suscipit tempor ipsum, id ornare arcu. Duis eros velit, dapibus cursus dolor sed, tincidunt egestas ipsum. Mauris non erat diam. Donec aliquet ultrices tincidunt. Vestibulum gravida leo nunc, ac auctor lacus varius sit amet. Quisque ultricies aliquet mauris, et dignissim orci consectetur at.";
 
-            StringBuilder sb = new StringBuilder(maxMessageSize);
+            StringBuilder sb = new(maxMessageSize);
             int messageBodyLengthLimit = maxMessageSize - sampleMessage.Length;
 
             while (sb.Length < messageBodyLengthLimit)

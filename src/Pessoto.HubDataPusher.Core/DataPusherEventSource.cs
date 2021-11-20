@@ -5,7 +5,7 @@ namespace Pessoto.HubDataPusher.Core
     [EventSource(Name = "Pessoto.HubDataPusher.Core.DataPusher")]
     public sealed class DataPusherEventSource : EventSource
     {
-        public static readonly DataPusherEventSource Log = new DataPusherEventSource();
+        public static readonly DataPusherEventSource Log = new();
 
         private readonly IncrementingEventCounter eventsSent;
         private readonly IncrementingEventCounter bytesSent;
